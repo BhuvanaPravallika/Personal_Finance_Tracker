@@ -81,7 +81,7 @@ npm install
 npm start
 
 Server runs on:
-http://localhost:4000
+http://localhost:4000/api/transactions
 
 3️⃣ Frontend Setup
 cd Frontend/frontend
