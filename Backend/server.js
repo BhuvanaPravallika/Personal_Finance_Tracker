@@ -40,6 +40,12 @@ const Transaction = mongoose.model('Transaction', transactionSchema);
 /* ===============================
    GET Transactions (With Filters)
 ================================= */
+
+app.get("/", (req, res) => {
+  res.send("Personal Finance Backend API is running 🚀");
+});
+
+
 app.get('/api/transactions', async (req, res) => {
   try {
     const { category, payee, dateFrom, dateTo, type } = req.query;
