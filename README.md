@@ -72,7 +72,7 @@ PersonalFinanceTracker
 
 ⚙️ Installation & Setup
 1️⃣ Clone Repository
-git clone https://github.com/BhuvanaPravallika/PersonalFinanceTracker.git
+git clone  https://github.com/BhuvanaPravallika/Personal_Finance_Tracker.git 
 cd PersonalFinanceTracker
 
 2️⃣ Backend Setup
