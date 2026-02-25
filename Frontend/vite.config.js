@@ -6,6 +6,6 @@ export default defineConfig({
   preview: {
     port: 4173, // optional, Vite port
     host: true, // listen on all interfaces
-    allowedHosts: ['personal-finance-tracker-nmqq.onrender.com'] // Add your Render URL here
+     allowedHosts: ['personal-finance-tracker-nmqq.onrender.com'] // Add your Render URL here
   }
 })

@@ -22,6 +22,7 @@ const defaultCategories = [
 ];
 
 // ✅ Replace with your deployed backend URL
+// Replace old local URL
 const API_URL = 'https://backend-personalfinancetracker.onrender.com';
 
 function App() {
