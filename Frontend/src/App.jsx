@@ -21,6 +21,9 @@ const defaultCategories = [
   'Travel', 'Health', 'Shopping', 'Education', 'Miscellaneous'
 ];
 
+// ✅ Replace with your deployed backend URL
+const API_URL = 'https://backend-personalfinancetracker.onrender.com';
+
 function App() {
   const [transactions, setTransactions] = useState([]);
   const pieRef = useRef(null);
@@ -42,7 +45,7 @@ function App() {
   useEffect(() => { fetchTransactions(); }, []);
 
   const fetchTransactions = () => {
-    axios.get('http://localhost:4000/api/transactions')
+    axios.get(`${API_URL}/api/transactions`)
       .then(res => {
         const normalized = res.data.map(txn => ({
           ...txn,
@@ -84,8 +87,8 @@ function App() {
 
     const parsedAmount = parseFloat(amount);
     const request = editTransactionId
-      ? axios.put(`http://localhost:4000/api/transactions/${editTransactionId}`, { date, payee, category, amount: parsedAmount })
-      : axios.post('http://localhost:4000/api/transactions', { date, payee, category, amount: parsedAmount });
+      ? axios.put(`${API_URL}/api/transactions/${editTransactionId}`, { date, payee, category, amount: parsedAmount })
+      : axios.post(`${API_URL}/api/transactions`, { date, payee, category, amount: parsedAmount });
 
     request
       .then(res => {
@@ -106,7 +109,7 @@ function App() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this transaction?')) return;
     try {
-      const res = await axios.delete(`http://localhost:4000/api/transactions/${id}`);
+      const res = await axios.delete(`${API_URL}/api/transactions/${id}`);
       setTransactions(transactions.filter(txn => txn._id !== id));
       toast.success(res.data.message || 'Transaction deleted successfully');
     } catch (err) { console.error(err); toast.error('Failed to delete transaction'); }
@@ -163,102 +166,69 @@ function App() {
   const uniqueCategories = ['All', ...new Set(transactions.filter(txn => txn?.category).map(txn => txn.category))];
 
   // ====== Charts Data ======
-const pieData = useMemo(() => ({
-  labels: defaultCategories,
-  datasets: [{
-    data: defaultCategories.map(cat =>
-      transactions
-        .filter(txn => txn.category === cat)
-        .reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0)
-    ),
-    backgroundColor: [
-      '#4e54c8', '#8f94fb', '#f39c12', '#27ae60', '#e74c3c',
-      '#9b59b6', '#1abc9c', '#f1c40f', '#34495e', '#d35400'
-    ],
-    borderWidth: 1,
-  }],
-}), [transactions]);
+  const pieData = useMemo(() => ({
+    labels: defaultCategories,
+    datasets: [{
+      data: defaultCategories.map(cat =>
+        transactions
+          .filter(txn => txn.category === cat)
+          .reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0)
+      ),
+      backgroundColor: [
+        '#4e54c8', '#8f94fb', '#f39c12', '#27ae60', '#e74c3c',
+        '#9b59b6', '#1abc9c', '#f1c40f', '#34495e', '#d35400'
+      ],
+      borderWidth: 1,
+    }],
+  }), [transactions]);
 
-useEffect(() => {
-  if (pieRef.current) {
-    pieRef.current.update();
-  }
-}, [pieData]);
+  useEffect(() => {
+    if (pieRef.current) {
+      pieRef.current.update();
+    }
+  }, [pieData]);
 
- const pieOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  interaction: {
-    mode: 'nearest',
-    intersect: true,
-  },
-  plugins: {
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        label: function (context) {
-          const total = context.dataset.data.reduce((a, b) => a + b, 0);
-          const value = context.raw || 0;
-          const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
-          return `${context.label}: ₹${value} (${percentage}%)`;
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'nearest', intersect: true },
+    plugins: {
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: function (context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const value = context.raw || 0;
+            const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
+            return `${context.label}: ₹${value} (${percentage}%)`;
+          },
         },
       },
+      legend: { position: 'bottom' },
     },
-    legend: {
-      position: 'bottom',
-    },
-  },
-};
-const barData = useMemo(() => {
-  const monthlyData = {};
-
-  transactions.forEach(txn => {
-    if (!txn.date) return;
-
-    const month = new Date(txn.date).toLocaleString('default', {
-      month: 'short',
-      year: 'numeric'
-    });
-
-    if (!monthlyData[month]) {
-      monthlyData[month] = { income: 0, expense: 0 };
-    }
-
-    const amount = parseFloat(txn.amount) || 0;
-
-    if (txn.category === 'Salary') {
-      monthlyData[month].income += amount;
-    } else {
-      monthlyData[month].expense += Math.abs(amount);
-    }
-  });
-
-  const labels = Object.keys(monthlyData);
-
-  return {
-    labels,
-    datasets: [
-      {
-        label: 'Income',
-        data: labels.map(month => monthlyData[month].income),
-        backgroundColor: '#27ae60'
-      },
-      {
-        label: 'Expense',
-        data: labels.map(month => monthlyData[month].expense),
-        backgroundColor: '#e74c3c'
-      }
-    ]
   };
-}, [transactions]);
 
-const barOptions = {
-  responsive: true,
-  maintainAspectRatio: false,   // ✅ Change this
-  plugins: {
-    legend: { position: 'top' }
-  }
-};
+  const barData = useMemo(() => {
+    const monthlyData = {};
+    transactions.forEach(txn => {
+      if (!txn.date) return;
+      const month = new Date(txn.date).toLocaleString('default', { month: 'short', year: 'numeric' });
+      if (!monthlyData[month]) monthlyData[month] = { income: 0, expense: 0 };
+      const amount = parseFloat(txn.amount) || 0;
+      if (txn.category === 'Salary') monthlyData[month].income += amount;
+      else monthlyData[month].expense += Math.abs(amount);
+    });
+    const labels = Object.keys(monthlyData);
+    return {
+      labels,
+      datasets: [
+        { label: 'Income', data: labels.map(m => monthlyData[m].income), backgroundColor: '#27ae60' },
+        { label: 'Expense', data: labels.map(m => monthlyData[m].expense), backgroundColor: '#e74c3c' }
+      ]
+    };
+  }, [transactions]);
+
+  const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } };
 
   // ====== RENDER ======
   if (showCharts) {
@@ -267,16 +237,10 @@ const barOptions = {
         <ToastContainer position="top-right" autoClose={2000} />
         <h2>📊 Financial Charts</h2>
         <button className="back-button" onClick={() => setShowCharts(false)}>← Back to Dashboard</button>
-
         <div className="charts-wrapper">
           <div className="chart-container">
             <h3>Category-wise Spending</h3>
-         <Pie
-  ref={pieRef}
-  data={pieData}
-  options={pieOptions}
-  redraw={true}
-/>
+            <Pie ref={pieRef} data={pieData} options={pieOptions} redraw={true} />
           </div>
           <div className="chart-container">
             <h3>Monthly Income/Expense</h3>
@@ -297,50 +261,25 @@ const barOptions = {
         <form className="form" onSubmit={handleAddOrUpdate}>
           <div className="form-row">
             <div className="input-group">
-              <input
-                type="date"
-                name="date"
-                value={newTransaction.date}
-                onChange={handleChange}
-                title="Enter the transaction date"
-              />
+              <input type="date" name="date" value={newTransaction.date} onChange={handleChange} title="Enter the transaction date" />
               {errors.date && <p className="error-message">{errors.date}</p>}
             </div>
             <div className="input-group">
-              <input
-                type="text"
-                name="payee"
-                placeholder="Payee"
-                value={newTransaction.payee}
-                onChange={handleChange}
-                title="Enter the payee or recipient"
-              />
+              <input type="text" name="payee" placeholder="Payee" value={newTransaction.payee} onChange={handleChange} title="Enter the payee or recipient" />
               {errors.payee && <p className="error-message">{errors.payee}</p>}
             </div>
           </div>
 
           <div className="form-row">
             <div className="input-group">
-              <select
-                name="category"
-                value={newTransaction.category}
-                onChange={handleChange}
-                title="Select the transaction category"
-              >
+              <select name="category" value={newTransaction.category} onChange={handleChange} title="Select the transaction category">
                 <option value="">Select Category</option>
                 {defaultCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
               {errors.category && <p className="error-message">{errors.category}</p>}
             </div>
             <div className="input-group">
-              <input
-                type="number"
-                name="amount"
-                placeholder="Amount"
-                value={newTransaction.amount}
-                onChange={handleChange}
-                title="Enter the transaction amount"
-              />
+              <input type="number" name="amount" placeholder="Amount" value={newTransaction.amount} onChange={handleChange} title="Enter the transaction amount" />
               {errors.amount && <p className="error-message">{errors.amount}</p>}
             </div>
           </div>
@@ -369,46 +308,24 @@ const barOptions = {
       <div className="filter-section">
         <div className="filter-group">
           <label>Category</label>
-          <select
-            value={filterCategory}
-            onChange={e => setFilterCategory(e.target.value)}
-            title="Filter transactions by category"
-          >
+          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} title="Filter transactions by category">
             {uniqueCategories.map(cat => <option key={cat}>{cat}</option>)}
           </select>
         </div>
         <div className="filter-group">
           <label>Payee</label>
-          <input
-            type="text"
-            placeholder="Search Payee"
-            value={filterPayee}
-            onChange={e => setFilterPayee(e.target.value)}
-            title="Search transactions by payee name"
-          />
+          <input type="text" placeholder="Search Payee" value={filterPayee} onChange={e => setFilterPayee(e.target.value)} title="Search transactions by payee name" />
         </div>
         <div className="filter-group">
           <label>From</label>
-          <input
-            type="date"
-            value={filterDateFrom}
-            onChange={e => setFilterDateFrom(e.target.value)}
-            title="Filter transactions from this date"
-          />
+          <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} title="Filter transactions from this date" />
         </div>
         <div className="filter-group">
           <label>To</label>
-          <input
-            type="date"
-            value={filterDateTo}
-            onChange={e => setFilterDateTo(e.target.value)}
-            title="Filter transactions up to this date"
-          />
+          <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} title="Filter transactions up to this date" />
         </div>
         <div>
-          <button className='download-button' onClick={downloadCSV} title="Download filtered transactions as CSV">
-            ⬇ Download CSV
-          </button>
+          <button className='download-button' onClick={downloadCSV} title="Download filtered transactions as CSV">⬇ Download CSV</button>
         </div>
       </div>
 
@@ -448,13 +365,7 @@ const barOptions = {
         <div className="pagination">
           <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Previous</button>
           {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={currentPage === i + 1 ? 'active-page' : ''}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </button>
+            <button key={i + 1} className={currentPage === i + 1 ? 'active-page' : ''} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
           ))}
           <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
         </div>
