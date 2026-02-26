@@ -64,11 +64,22 @@ app.get('/api/transactions', async (req, res) => {
       filter.type = type; // income / expense
     }
 
-    if (dateFrom || dateTo) {
-      filter.date = {};
-      if (dateFrom) filter.date.$gte = new Date(dateFrom);
-      if (dateTo) filter.date.$lte = new Date(dateTo);
-    }
+   if (dateFrom || dateTo) {
+  filter.date = {};
+
+  if (dateFrom && !isNaN(new Date(dateFrom))) {
+    filter.date.$gte = new Date(dateFrom);
+  }
+
+  if (dateTo && !isNaN(new Date(dateTo))) {
+    filter.date.$lte = new Date(dateTo);
+  }
+
+  // Remove empty date filter
+  if (Object.keys(filter.date).length === 0) {
+    delete filter.date;
+  }
+}
 
     const transactions = await Transaction
       .find(filter)
