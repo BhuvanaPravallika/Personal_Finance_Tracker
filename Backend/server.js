@@ -14,7 +14,6 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-
 /* ===============================
    Transaction Schema
 ================================= */
@@ -22,11 +21,6 @@ const transactionSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   payee: { type: String, required: true, trim: true },
   category: { type: String, required: true, trim: true },
-  type: { 
-    type: String, 
-    enum: ['income', 'expense'], 
-    required: true 
-  },
   amount: { 
     type: Number, 
     required: true,
@@ -36,19 +30,19 @@ const transactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-
 /* ===============================
-   GET Transactions (With Filters)
+   Home Route
 ================================= */
-
 app.get("/", (req, res) => {
   res.send("Personal Finance Backend API is running 🚀");
 });
 
-
+/* ===============================
+   GET Transactions (With Filters)
+================================= */
 app.get('/api/transactions', async (req, res) => {
   try {
-    const { category, payee, dateFrom, dateTo, type } = req.query;
+    const { category, payee, dateFrom, dateTo } = req.query;
 
     const filter = {};
 
@@ -60,26 +54,21 @@ app.get('/api/transactions', async (req, res) => {
       filter.payee = { $regex: payee, $options: 'i' };
     }
 
-    if (type) {
-      filter.type = type; // income / expense
+    if (dateFrom || dateTo) {
+      filter.date = {};
+
+      if (dateFrom && !isNaN(new Date(dateFrom))) {
+        filter.date.$gte = new Date(dateFrom);
+      }
+
+      if (dateTo && !isNaN(new Date(dateTo))) {
+        filter.date.$lte = new Date(dateTo);
+      }
+
+      if (Object.keys(filter.date).length === 0) {
+        delete filter.date;
+      }
     }
-
-   if (dateFrom || dateTo) {
-  filter.date = {};
-
-  if (dateFrom && !isNaN(new Date(dateFrom))) {
-    filter.date.$gte = new Date(dateFrom);
-  }
-
-  if (dateTo && !isNaN(new Date(dateTo))) {
-    filter.date.$lte = new Date(dateTo);
-  }
-
-  // Remove empty date filter
-  if (Object.keys(filter.date).length === 0) {
-    delete filter.date;
-  }
-}
 
     const transactions = await Transaction
       .find(filter)
@@ -93,23 +82,19 @@ app.get('/api/transactions', async (req, res) => {
   }
 });
 
-
 /* ===============================
    ADD Transaction
 ================================= */
 app.post('/api/transactions', async (req, res) => {
   try {
-    let { date, payee, category, type, amount } = req.body;
+    let { date, payee, category, amount } = req.body;
 
-    // Normalize data
-    type = type?.toLowerCase();
     amount = Number(amount);
 
     const txn = new Transaction({
       date: new Date(date),
       payee,
       category,
-      type,
       amount
     });
 
@@ -121,11 +106,10 @@ app.post('/api/transactions', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('FULL ERROR:', err);  // Important
+    console.error('FULL ERROR:', err);
     res.status(500).json({ error: err.message });
   }
 });
-
 
 /* ===============================
    UPDATE Transaction
@@ -135,6 +119,7 @@ app.put('/api/transactions/:id', async (req, res) => {
     const txnId = req.params.id;
 
     const updatedData = { ...req.body };
+
     if (updatedData.date) {
       updatedData.date = new Date(updatedData.date);
     }
@@ -160,7 +145,6 @@ app.put('/api/transactions/:id', async (req, res) => {
   }
 });
 
-
 /* ===============================
    DELETE Transaction
 ================================= */
@@ -183,10 +167,9 @@ app.delete('/api/transactions/:id', async (req, res) => {
   }
 });
 
-
 /* ===============================
    Monthly Summary API
-   (For Bar Chart)
+   (Without type)
 ================================= */
 app.get('/api/summary/monthly', async (req, res) => {
   try {
@@ -195,8 +178,7 @@ app.get('/api/summary/monthly', async (req, res) => {
         $group: {
           _id: {
             year: { $year: "$date" },
-            month: { $month: "$date" },
-            type: "$type"
+            month: { $month: "$date" }
           },
           total: { $sum: "$amount" }
         }
@@ -211,7 +193,6 @@ app.get('/api/summary/monthly', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch summary' });
   }
 });
-
 
 /* ===============================
    Server
