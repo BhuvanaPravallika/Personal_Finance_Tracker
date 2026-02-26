@@ -89,8 +89,7 @@ npm install
 npm run dev
 
 Frontend runs on:
-http://localhost:5173
-
+https://personal-finance-tracker-nmqq.onrender.com/
 ## 📊 Screenshots
 
 ### 🏠 Dashboard
