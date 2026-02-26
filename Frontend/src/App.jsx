@@ -331,7 +331,7 @@ function App() {
       </div>
 
       {/* ====== TRANSACTIONS TABLE ====== */}
-      
+      <div class="table-wrapper">
       <table>
         <thead>
           <tr>
@@ -361,7 +361,7 @@ function App() {
           )}
         </tbody>
       </table>
-
+          </div>
       {/* ====== PAGINATION ====== */}
       {totalPages > 1 && (
         <div className="pagination">
