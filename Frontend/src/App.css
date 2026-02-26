@@ -1,5 +1,5 @@
 body {
-  /* display: flex; */
+  display: flex;
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
@@ -8,14 +8,12 @@ body {
 }
 
 .container {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;   /* changed from 30px auto */
-  padding: 20px;
+  max-width: 960px;
+  margin: 30px auto;
+  padding: 25px 30px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-  box-sizing: border-box;
 }
 
 h2 {
@@ -28,14 +26,15 @@ h2 {
 /* Form Section */
 .form-section {
   display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 20px;
-  flex-wrap: wrap;   /* important */
   margin-bottom: 25px;
 }
 
 .form {
-  flex: 1 1 350px;
-  min-width: 280px;
+  flex: 1;
+  min-width: 300px;
   background-color: #f7f8fa;
   padding: 18px;
   border-radius: 10px;
@@ -110,6 +109,12 @@ h2 {
   gap: 10px;
 }
 
+.back-button {
+  display: block;
+  margin-left: auto;
+  margin-bottom: 20px;
+}
+
 /* Balance Box */
 .balance-box {
   background-color: #fff;
@@ -119,6 +124,24 @@ h2 {
   text-align: center;
   margin-top: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
+
+.balance-box:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.balance-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.balance-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
 }
 
 .balance {
@@ -143,18 +166,39 @@ h2 {
 .filter-group {
   display: flex;
   flex-direction: column;
+  font-size: 14px;
+  color: #333;
 }
 
-/* Table Wrapper (NEW – correct method) */
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
+.filter-group label {
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #555;
 }
 
+.filter-group input,
+.filter-group select {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74,144,226,0.3);
+}
+
+/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 thead {
@@ -181,84 +225,74 @@ tbody tr:hover {
   flex-wrap: wrap;
 }
 
-/* Charts */
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination .active-page {
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* ===== CHARTS PAGE (UPDATED & FIXED) ===== */
+
 .charts-wrapper {
   display: flex;
+  justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
   margin-top: 20px;
+  clear: both;
 }
 
 .chart-container {
-  flex: 1 1 400px;
-  min-width: 280px;
   background-color: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 280px;
+  max-width: 460px;
+  margin-bottom: 20px;
 }
 
+.chart-container:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.chart-container h3 {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* IMPORTANT FIX: Prevent vertical stretch */
 .chart-container canvas {
   width: 100% !important;
   height: auto !important;
   max-height: 350px;
 }
 
-/* ============================= */
-/* 📱 MOBILE RESPONSIVE         */
-/* ============================= */
-
-@media (max-width: 768px) {
-
-   .container {
-    margin: 0;          /* remove side spacing */
-    border-radius: 0;   /* optional: full mobile feel */
-    padding: 15px;
-  }
-
-
-  h2 {
-    font-size: 16px;
-  }
-
-  .form-row {
-    flex-direction: column;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .add-button,
-  .update-button,
-  .cancel-button,
-  .chart-button,
-  .back-button {
-    width: 100%;
-  }
-
-  .filter-section {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .charts-wrapper {
-    flex-direction: column;
-  }
-
-  .chart-container canvas {
-    max-height: 250px;
-  }
+/* Download Button */
+.download-button {
+  background-color: #27ae60;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-@media (max-width: 480px) {
-
-  .balance {
-    font-size: 1.6rem;
-  }
-
-  th, td {
-    padding: 8px;
-    font-size: 12px;
-  }
+.download-button:hover {
+  background-color: #219150;
 }
