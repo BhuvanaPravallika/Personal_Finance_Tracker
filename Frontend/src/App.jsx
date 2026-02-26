@@ -331,6 +331,7 @@ function App() {
       </div>
 
       {/* ====== TRANSACTIONS TABLE ====== */}
+      <div style={{ overflowX: "auto" }}>
       <table>
         <thead>
           <tr>
@@ -360,6 +361,7 @@ function App() {
           )}
         </tbody>
       </table>
+      </div>
 
       {/* ====== PAGINATION ====== */}
       {totalPages > 1 && (
