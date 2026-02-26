@@ -99,7 +99,11 @@ app.get('/api/transactions', async (req, res) => {
 ================================= */
 app.post('/api/transactions', async (req, res) => {
   try {
-    const { date, payee, category, type, amount } = req.body;
+    let { date, payee, category, type, amount } = req.body;
+
+    // Normalize data
+    type = type?.toLowerCase();
+    amount = Number(amount);
 
     const txn = new Transaction({
       date: new Date(date),
@@ -117,8 +121,8 @@ app.post('/api/transactions', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Error saving transaction:', err);
-    res.status(500).json({ error: 'Failed to save transaction' });
+    console.error('FULL ERROR:', err);  // Important
+    res.status(500).json({ error: err.message });
   }
 });
 
