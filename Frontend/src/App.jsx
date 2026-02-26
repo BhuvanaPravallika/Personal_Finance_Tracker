@@ -361,7 +361,7 @@ function App() {
           )}
         </tbody>
       </table>
-          </div>
+</div>
       {/* ====== PAGINATION ====== */}
       {totalPages > 1 && (
         <div className="pagination">
